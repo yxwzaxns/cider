@@ -1,5 +1,5 @@
 ## 项目流程
-![](github.com/yxwzaxns/cider/docs/ciderprocess.jpeg)
+![](https://github.com/yxwzaxns/cider/blob/master/docs/ciderprocess.jpeg)
 
 ## 相关资料
 
