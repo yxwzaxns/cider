@@ -1,21 +1,26 @@
 package main
 
-// "os",
-import (
-	"encoding/json"
-	"fmt"
-)
+import "fmt"
 
-type Response1 struct {
-	Page   int      `json:"page"`
-	Fruits []string `json:"fruits"`
+type Config struct {
+	listenIp   string
+	listenPort string
+}
+
+func initConfig() *Config {
+	c := new(Config)
+	c.listenIp = "127.0.0.1"
+	c.listenPort = "8080"
+	return c
+}
+
+func GetConfig() *Config {
+	c := initConfig()
+	fmt.Println(c.listenIp)
+	return c
 }
 
 func main() {
-	byt := []byte(`{"num":6.13,"strs":["a","b"]}`)
-	var dat map[string]interface{}
-	if err := json.Unmarshal(byt, &dat); err != nil {
-		panic(err)
-	}
-	fmt.Println(dat)
+	c := GetConfig()
+	println(c.listenIp)
 }

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./server"
+	"cider/server"
 )
 
 func main() {

@@ -1,7 +1,11 @@
 package server
 
+import (
+	"cider/config"
+)
+
 func Init() {
-	// config := config.GetConfig()
+	c := config.GetConfig()
 	r := NewRouter()
-	r.Run()
+	r.Run(c.ListenIp + `:` + c.ListenPort)
 }
