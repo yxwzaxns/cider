@@ -14,4 +14,12 @@
 3. docs 为相关文档说明分支
 4. 可以新建其他功能分支，最终合并到 dev 分支
 
+## 备注
+web hook 请求数据：
+> Request method: POST
+
+> content-type: application/x-www-form-urlencoded
+
+> payload : {json data} // 数据内容在 github-hook.json 文件里
+
 ## 待补充。。
