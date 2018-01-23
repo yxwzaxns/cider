@@ -4,10 +4,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//User xx
 type User struct {
 	Name string `json:"name"`
 }
 
+//Login xx
 func (h User) Login(c *gin.Context) {
 	u := c.PostForm("username")
 
@@ -17,6 +19,7 @@ func (h User) Login(c *gin.Context) {
 	})
 }
 
+//Logout xx
 func (h User) Logout(c *gin.Context) {
 	u := c.PostForm("username")
 

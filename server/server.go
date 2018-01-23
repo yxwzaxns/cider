@@ -4,8 +4,9 @@ import (
 	"cider/config"
 )
 
+// Init xx
 func Init() {
 	c := config.GetConfig()
 	r := NewRouter()
-	r.Run(c.ListenIp + `:` + c.ListenPort)
+	r.Run(c.ListenIP + `:` + c.ListenPort)
 }

@@ -4,10 +4,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//NewRouter xx
 func NewRouter() *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
+	router.Static("/assets", "./assets")
+	// router.LoadHTMLGlob(ProjectPath + "templates/*")
 
 	// health := new(controllers.HealthController)
 
@@ -16,6 +19,8 @@ func NewRouter() *gin.Engine {
 			"message": "pong",
 		})
 	})
+
+	router.GET("/")
 	// router.Use(AuthMiddleware())
 	v1 := router.Group("v1")
 	{
@@ -26,5 +31,6 @@ func NewRouter() *gin.Engine {
 			userGroup.POST("/logout", user.Logout)
 		}
 	}
+
 	return router
 }

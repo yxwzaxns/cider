@@ -5,5 +5,6 @@ import (
 )
 
 func main() {
+	// ProjectPath, _ = filepath.Abs("./")
 	server.Init()
 }
