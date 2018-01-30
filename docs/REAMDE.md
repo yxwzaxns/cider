@@ -6,6 +6,7 @@
 1. [golang 参考资料](https://github.com/Unknwon/the-way-to-go_ZH_CN)
 2. [docker api reference](https://docs.docker.com/develop/sdk/examples/#list-and-manage-containers)
 2. [docker api](https://docs.docker.com/engine/api/v1.33/#operation/ContainerList)
+4. [http framework](https://github.com/gin-gonic/gin)
 
 ## 开发规范
 整个代码提交流程基本符合 GitFlow 规范
