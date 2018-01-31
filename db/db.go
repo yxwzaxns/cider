@@ -13,4 +13,4 @@ type Project struct {
 	ProjectStatus
 }
 
-type ProjectDB [](*Project)
+type ProjectTable [](*Project)

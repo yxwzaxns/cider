@@ -1,6 +1,6 @@
 package db
 
-func (p ProjectDB) FindByID(id int) []Project {
+func (p ProjectTable) FindByID(id int) []Project {
 	var res []Project
 	if id <= p.Size() {
 		res = make([]Project, 1)
@@ -9,7 +9,7 @@ func (p ProjectDB) FindByID(id int) []Project {
 	return res
 }
 
-func (p ProjectDB) FindAll() []Project {
+func (p ProjectTable) FindAll() []Project {
 	res := make([]Project, p.Size())
 	for index := 0; index < p.Size(); index++ {
 		res[index] = *p[index]
@@ -17,10 +17,10 @@ func (p ProjectDB) FindAll() []Project {
 	return res
 }
 
-func (p *ProjectDB) Add(project *Project) {
+func (p *ProjectTable) Add(project *Project) {
 	*p = append(*p, project)
 }
 
-func (p ProjectDB) Size() int {
+func (p ProjectTable) Size() int {
 	return len(p)
 }

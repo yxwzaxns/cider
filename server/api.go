@@ -3,6 +3,7 @@ package server
 import (
 	"cider/db"
 	G "cider/global"
+	"fmt"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -48,6 +49,33 @@ func (h User) Logout(c *gin.Context) {
 	})
 }
 
+func dealProject(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	action := c.Param("action")
+	switch action {
+	case "stop":
+		project := G.Projects.FindByID(id)
+		G.Core.RemoveTask(project[0].ProjectURL)
+		c.JSON(200, gin.H{
+			"status": "ok",
+			"info":   "stop req submit",
+		})
+		break
+	case "submit":
+		project := G.Projects.FindByID(id)
+		G.Core.AddTask(project[0].ProjectURL)
+		c.JSON(200, gin.H{
+			"status": "ok",
+			"info":   "submit req submit",
+		})
+		break
+	default:
+		c.JSON(200, gin.H{
+			"status": "error",
+			"reason": "unknown req : " + action,
+		})
+	}
+}
 func getAllProject() []db.Project {
 	projects := G.Projects.FindAll()
 	return projects
@@ -84,5 +112,29 @@ func deleteProject(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"status": "posted",
 		"user":   "ok",
+	})
+}
+
+func coreCheck(c *gin.Context) {
+	item := c.Param("item")
+	switch item {
+	case "chan":
+		G.EventsChan <- item
+		break
+	default:
+		break
+	}
+	c.JSON(200, gin.H{
+		"status": "ok",
+	})
+}
+
+func getTasks(c *gin.Context) {
+	taskCount := G.Core.GetTaskCount()
+	activeTaskCount := G.Core.GetActiveTaskCount()
+	res := fmt.Sprintf("{'tasks count': %d,'active tasks count':%d}", taskCount, activeTaskCount)
+	c.JSON(200, gin.H{
+		"status":    "ok",
+		"task info": res,
 	})
 }

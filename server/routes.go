@@ -1,7 +1,9 @@
 package server
 
 import (
+	G "cider/global"
 	"net/http"
+	"path"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,7 +14,7 @@ func NewRouter() *gin.Engine {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 	router.Static("/assets", "./assets")
-	// router.LoadHTMLGlob(ProjectPath + "templates/*")
+	router.LoadHTMLGlob(path.Join(G.BasePath, "templates/*"))
 
 	// health := new(controllers.HealthController)
 
@@ -29,8 +31,8 @@ func NewRouter() *gin.Engine {
 	dashboard := router.Group("dashboard")
 	{
 		dashboard.GET("/", func(c *gin.Context) {
-			c.JSON(200, gin.H{
-				"message": "cider system dashboard",
+			c.HTML(http.StatusOK, "index.tmpl", gin.H{
+				"title": "cider system dashboard",
 			})
 		})
 	}
@@ -47,7 +49,7 @@ func NewRouter() *gin.Engine {
 		projectGroup := v1.Group("project")
 		{
 			projectGroup.GET("/:id", getProject)
-			// projectGroup.GET("/all", project.GetAll)
+			projectGroup.GET("/:id/:action", dealProject)
 			projectGroup.POST("/", createProject)
 			projectGroup.DELETE("/", deleteProject)
 		}
@@ -67,10 +69,11 @@ func NewRouter() *gin.Engine {
 		// about core
 		coreGroup := v1.Group("core")
 		{
-			core := new(Core)
-			coreGroup.GET("/status", core.Status)
-			coreGroup.POST("/ci-done", core.CiDone)
-			coreGroup.POST("/cd-done", core.CdDone)
+			// core := new(Core)
+			coreGroup.GET("/check/:item", coreCheck)
+			coreGroup.GET("/task", getTasks)
+			// coreGroup.POST("/ci-done", core.CiDone)
+			// coreGroup.POST("/cd-done", core.CdDone)
 		}
 	}
 
