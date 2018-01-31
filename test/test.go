@@ -1,21 +1,49 @@
 package main
 
-// "os",
-import (
-	"encoding/json"
-	"fmt"
-)
+import "github.com/davecgh/go-spew/spew"
 
-type Response1 struct {
-	Page   int      `json:"page"`
-	Fruits []string `json:"fruits"`
+type ProjectStatus struct {
+	Avtive   bool
+	CiStatus bool
+	CdStatus bool
+	Now      string
 }
 
+type Project struct {
+	ProjectName string
+	ProjectURL  string
+	ProjectStatus
+}
+
+type Pa [](*Project)
+
+func (p Pa) Get(id int) Project {
+	return *p[id]
+}
+
+func (p *Pa) Set(project *Project) {
+	*p = append(*p, project)
+}
+
+var Projects Pa
+
 func main() {
-	byt := []byte(`{"num":6.13,"strs":["a","b"]}`)
-	var dat map[string]interface{}
-	if err := json.Unmarshal(byt, &dat); err != nil {
-		panic(err)
-	}
-	fmt.Println(dat)
+	p := new(Project)
+	p.ProjectName = "aong"
+	p.ProjectURL = "https://ssdfdf"
+
+	Projects.Set(p)
+
+	spew.Dump(Projects.Get(0))
+
+	p = new(Project)
+	p.ProjectName = "aaaa"
+	p.ProjectURL = "https://ssvvvvf"
+	// p.Status = new(ProjectStatus)
+	Projects.Set(p)
+
+	spew.Dump(Projects.Get(1))
+
+	println(cap(Projects))
+	println(len(Projects))
 }
