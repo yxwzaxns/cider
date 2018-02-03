@@ -13,8 +13,8 @@ func NewRouter() *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
-	router.Static("/assets", "./assets")
-	router.LoadHTMLGlob(path.Join(G.BasePath, "templates/*"))
+	router.Static("/assets", path.Join(G.BasePath, "server/assets"))
+	router.LoadHTMLGlob(path.Join(G.BasePath, "server/templates/*"))
 
 	// health := new(controllers.HealthController)
 
