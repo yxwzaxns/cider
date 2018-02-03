@@ -1,19 +1,20 @@
 package config
 
+import "os"
+
 // Config xx
 type Config struct {
-	ListenIP   string
-	ListenPort string
+	ListenIP                  string
+	ListenPort                string
+	ContinuousIntegrationPath string
+	// ContinuousDistribution
 }
 
-func initConfig() *Config {
-	c := new(Config)
+func (c *Config) Init() {
 	c.ListenIP = "127.0.0.1"
 	c.ListenPort = "8080"
-	return c
+	c.ContinuousIntegrationPath = "/var/"
 }
-
-// GetConfig xx
-func GetConfig() *Config {
-	return initConfig()
+func (c *Config) InitEnvironmentVariable() {
+	os.Setenv("ContinuousIntegrationPath", c.ContinuousIntegrationPath)
 }

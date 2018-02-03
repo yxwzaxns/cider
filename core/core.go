@@ -4,11 +4,20 @@ import (
 	"time"
 )
 
-var eventsChan chan string
+type M struct {
+	URL  string
+	info string
+}
 
 type Core struct {
 	Tasks tasks
 }
+
+var (
+	eventsChan chan string
+	ciChan     chan M
+	cdChan     chan M
+)
 
 func (c *Core) GetTaskCount() int {
 	return c.Tasks.Size()
@@ -33,6 +42,8 @@ func (c *Core) dealEvent(event string) {
 
 func (c *Core) Init(EventChan chan string) {
 	eventsChan = EventChan
+	ciChan = make(chan M, 10)
+	cdChan = make(chan M, 10)
 	c.createEventsDaemon()
 }
 

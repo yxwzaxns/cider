@@ -21,7 +21,7 @@ func (t *Task) Init() {
 }
 func (t *Task) CI() {
 	t.Status = "CI"
-	StartCI()
+	StartCI(t.URL, ciChan)
 }
 func (t *Task) CD() {
 	t.Status = "CD"

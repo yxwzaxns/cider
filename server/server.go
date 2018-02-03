@@ -8,7 +8,9 @@ import (
 func Init() {
 	// init CI/CD queue
 	// CDQUEUE := make(chan string)
-	c := config.GetConfig()
+	c := new(config.Config)
+	c.Init()
+	c.InitEnvironmentVariable()
 	r := NewRouter()
 	r.Run(c.ListenIP + `:` + c.ListenPort)
 }

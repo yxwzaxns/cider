@@ -1,0 +1,12 @@
+version: '2'
+services:
+  cider-server:
+    image:
+      build: .
+    ports:
+      - 80:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+    environment:
+      - CIDER_PASSWORD=${CIDER_PASSWORD}
