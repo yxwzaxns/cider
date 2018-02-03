@@ -1,4 +1,4 @@
-package core
+package main
 
 import (
 	"context"
@@ -16,25 +16,22 @@ import (
 )
 
 var (
-	CodeURL  string
+	CodeUrl  string
 	WorkPath string
 	RootDir  string
-	MChan    chan M
-	m        *M
 )
 
 func init() {
-	CodeURL = ""
+	CodeUrl = ""
 	WorkPath = ""
 	RootDir = "/tmp"
-	m = new(M)
 }
 
-func StartCI(URL string, msgChan chan M) {
-	MChan = msgChan
-	CodeURL = URL
-	m.URL = URL
-	m.info = ""
+func StartCI(url string) {
+	// mChan = msgChan
+	CodeUrl = url
+	// m.URL = url
+	// m.info = ""
 	// time.Sleep(50000 * time.Millisecond)
 	initWorkDir()
 	println("initWorkDir finished")
@@ -50,7 +47,7 @@ func StartCI(URL string, msgChan chan M) {
 
 func initWorkDir() {
 	basePath := filepath.Join(RootDir, "cider_workspace")
-	path := filepath.Join(basePath, convertURLToPath(CodeURL))
+	path := filepath.Join(basePath, convertURLToPath(CodeUrl))
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		// os.RemoveAll(path)
@@ -66,8 +63,8 @@ func initWorkDir() {
 	WorkPath = path
 }
 func pullCode() {
-	projectURL := "https://" + CodeURL + ".git"
-	// println("pullCode : ", URL)
+	projectURL := "https://" + CodeUrl + ".git"
+	// println("pullCode : ", url)
 	// if dir exist that check if exist .git file
 	//
 	// to do
@@ -88,9 +85,8 @@ func pullCode() {
 
 		// Pull the latest changes from the origin remote and merge into the current branch
 		// Info("git pull origin")
-		w.Pull(&git.PullOptions{RemoteName: "origin"})
-
-		// CheckIfError(err)
+		err = w.Pull(&git.PullOptions{RemoteName: "origin"})
+		CheckIfError(err)
 
 		// Print the latest commit that was just pulled
 		// ref, err := r.Head()
@@ -111,21 +107,17 @@ func pullCode() {
 	}
 }
 func buildImage() {
-	// put dir to #{CodeURL}.tar
-	tarFilePath := filepath.Join(WorkPath, "aim.tar")
+	// put dir to #{CodeUrl}.tar
+	tarFilePath := filepath.Join(WorkPath, ".tar")
 	createTar(WorkPath)
 	defer deleteFile(tarFilePath)
 	// send build req to Docker Daemon
-	// ctx, _ := context.WithCancel(context.Background())
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
 	if dockerBuildContext, err := os.Open(tarFilePath); err == nil {
 		defer dockerBuildContext.Close()
-		cli, err := client.NewEnvClient()
-		if err != nil {
-			fmt.Printf("%s", err.Error())
-		}
+		cli, _ := client.NewEnvClient()
 		options := types.ImageBuildOptions{
-			Tags:           []string{CodeURL},
+			Tags:           []string{CodeUrl},
 			NoCache:        false,
 			SuppressOutput: false,
 			Remove:         true,
@@ -145,7 +137,7 @@ func buildImage() {
 				// timeout := 30 * 1000
 				// time.Sleep(time.Duration(timeout) * time.Millisecond)
 				// cancel()
-				_, err := ioutil.ReadAll(buildResponse.Body)
+				response, err := ioutil.ReadAll(buildResponse.Body)
 				if err != nil {
 					fmt.Printf("%s", err.Error())
 				}
@@ -173,10 +165,11 @@ func deleteFile(path string) {
 		}
 	}
 }
-func convertURLToPath(URL string) string {
-	return strings.Replace(strings.Replace(URL, "/", "_", -1), ".", "_", -1)
+func convertURLToPath(url string) string {
+	return strings.Replace(strings.Replace(url, "/", "_", -1), ".", "_", -1)
 
 }
+
 func CheckIfError(err error) {
 	if err == nil {
 		return
@@ -191,8 +184,7 @@ func Info(format string, args ...interface{}) {
 func createTar(path string) {
 	// path := "/tmp/cider_workspace/github_com_yxwzaxns_cider-ci-test"
 	dirs := getDirList(WorkPath)
-	tarPath := filepath.Join(path, "aim.tar")
-	archiver.Tar.Make(tarPath, dirs)
+	archiver.Tar.Make(filepath.Join(path, ".tar"), dirs)
 }
 func getDirList(path string) []string {
 	files := []string{}
@@ -201,4 +193,8 @@ func getDirList(path string) []string {
 		files = append(files, filepath.Join(path, f.Name()))
 	}
 	return files
+}
+func main() {
+	url := "github.com/yxwzaxns/cider-ci-test"
+	StartCI(url)
 }

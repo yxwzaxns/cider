@@ -3,6 +3,7 @@ package global
 import (
 	"cider/core"
 	"cider/db"
+	"path/filepath"
 )
 
 var (
@@ -13,7 +14,8 @@ var (
 )
 
 func Init() {
-	BasePath = ""
+	path, _ := filepath.Abs(".")
+	BasePath = path
 	EventsChan = make(chan string, 10)
 	Core = new(core.Core)
 	Core.Init(EventsChan)
