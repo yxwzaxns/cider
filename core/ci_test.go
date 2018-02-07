@@ -6,7 +6,7 @@ import (
 
 func TestStartCI(t *testing.T) {
 	mChan := make(chan M, 10)
-	codeURL := "github.com/yxwzaxns/aong-ghost"
+	codeURL := "github.com/yxwzaxns/cider-ci-test"
 	println("start test ci")
 	StartCI(codeURL, mChan)
 
