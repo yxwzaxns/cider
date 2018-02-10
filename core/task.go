@@ -25,7 +25,7 @@ func (t *Task) CI() {
 }
 func (t *Task) CD() {
 	t.Status = "CD"
-	StartCD()
+	StartCD(t.URL, cdChan)
 }
 func (t *Task) Done() {
 	t.Active = false
