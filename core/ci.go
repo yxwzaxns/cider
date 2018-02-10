@@ -34,10 +34,10 @@ func init() {
 	DockerAPIVersion = 1.36
 }
 
-func StartCI(URL string, msgChan chan M) {
+func StartCI(url string, msgChan chan M) {
 	MChan = msgChan
-	CodeURL = URL
-	m.URL = URL
+	CodeURL = url
+	m.URL = url
 	m.info = ""
 	// time.Sleep(50000 * time.Millisecond)
 	initWorkDir()
@@ -45,7 +45,7 @@ func StartCI(URL string, msgChan chan M) {
 	pullCode()
 	println("pullCode finished")
 	for {
-		if buildImage() == 0 {
+		if buildImage() == 0 && DockerAPIVersion >= 1.20 {
 			break
 		} else {
 			DockerAPIVersion -= 0.01
