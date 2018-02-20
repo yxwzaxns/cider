@@ -1,5 +1,7 @@
 package db
 
+var dbPath string
+
 type ProjectStatus struct {
 	Avtive        bool
 	CiStatus      string // unstart working  finished
