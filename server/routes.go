@@ -13,6 +13,7 @@ func NewRouter() *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
+	router.Use(CorsMiddleware())
 	router.Static("/assets", path.Join(G.BasePath, "server/assets"))
 	router.LoadHTMLGlob(path.Join(G.BasePath, "server/templates/*"))
 	println(path.Join(G.BasePath, "server/templates/*"))
@@ -51,6 +52,7 @@ func NewRouter() *gin.Engine {
 			projectGroup := v1.Group("project")
 			{
 				projectGroup.GET("/:id", getProject)
+				// projectGroup.OPTIONS("/:id", preflight)
 				projectGroup.GET("/:id/:action", dealProject)
 				projectGroup.POST("/", createProject)
 				projectGroup.DELETE("/", deleteProject)
@@ -80,4 +82,35 @@ func NewRouter() *gin.Engine {
 		}
 	}
 	return router
+}
+
+func CorsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Set example variable
+		// c.Set("example", "12345")
+
+		// before request
+		if c.Request.Method == "OPTIONS" {
+			c.Header("Access-Control-Allow-Origin", "*")
+			c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers, Authorization")
+			c.JSON(204, gin.H{})
+		}
+
+		if c.Request.Header.Get("Origin") != "" {
+			c.Header("Access-Control-Allow-Origin", "*")
+			c.Next()
+		} else {
+			c.Next()
+		}
+
+		// c.Next()
+
+		// after request
+		// latency := time.Since(t)
+		// log.Print(latency)
+
+		// access the status we are sending
+		// status := c.Writer.Status()
+		// log.Println(status)
+	}
 }

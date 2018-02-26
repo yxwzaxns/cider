@@ -16,7 +16,11 @@ func rege(s string) {
 func getString(s string) string {
 	return s[0:17]
 }
+
+// var s = "adf"
+
 func main() {
 	// rege("Error response from daemon: client version 1.36 is too new. Maximum supported API version is 1.35")
-	println(getString("github.com/yxwzaxns/cider-ci-test"))
+	// println(getString("github.com/yxwzaxns/cider-ci-test"))
+	println(s)
 }
