@@ -22,7 +22,7 @@ var (
 	WorkPath         string
 	RootDir          string
 	MChan            chan M
-	m                *M
+	m                M
 	DockerAPIVersion float64
 )
 
@@ -30,20 +30,20 @@ func init() {
 	CodeURL = ""
 	WorkPath = ""
 	RootDir = "/tmp"
-	m = new(M)
+	m = M{}
 	DockerAPIVersion = 1.36
 }
 
+// url is "github.com/username/projectName"
 func StartCI(url string, msgChan chan M) {
 	MChan = msgChan
 	CodeURL = url
 	m.URL = url
-	m.info = ""
 	// time.Sleep(50000 * time.Millisecond)
 	initWorkDir()
-	println("initWorkDir finished")
+	sendNotification("initWorkDir finished")
 	pullCode()
-	println("pullCode finished")
+	sendNotification("pullCode finished")
 	for {
 		if buildImage() == 0 && DockerAPIVersion >= 1.20 {
 			break
@@ -51,11 +51,11 @@ func StartCI(url string, msgChan chan M) {
 			DockerAPIVersion -= 0.01
 		}
 	}
-	println("buildImage finished")
+	sendNotification("buildImage finished")
 	checkImage()
-	println("checkImage finished")
+	sendNotification("checkImage finished")
 	clean()
-	println("CI finished")
+	sendNotification("CI finished")
 }
 
 func initWorkDir() {
@@ -88,7 +88,7 @@ func pullCode() {
 	gitFilePath := filepath.Join(WorkPath, ".git")
 
 	if _, err := os.Stat(gitFilePath); err == nil {
-		// git pull
+		println("start pull code")
 		// We instance a new repository targeting the given path (the .git folder)
 		r, err := git.PlainOpen(WorkPath)
 		CheckIfError(err)
@@ -111,7 +111,7 @@ func pullCode() {
 
 		// fmt.Println(commit)
 	} else {
-		// git clone
+		println("start clone code")
 		_, err := git.PlainClone(WorkPath, false, &git.CloneOptions{
 			URL: projectURL,
 			// Progress: os.Stdout,
@@ -147,7 +147,6 @@ func buildImage() int {
 		ForceRemove:    true,
 		PullParent:     true,
 	}
-
 	// ctx, _ := context.WithCancel(context.Background())
 	ctx := context.Background()
 	// send build req to Docker Daemon
@@ -159,22 +158,13 @@ func buildImage() int {
 			panic(err)
 		}
 	} else {
-		// fmt.Printf("********* %s **********", buildResponse.OSType)
-		_, err := ioutil.ReadAll(buildResponse.Body)
+		sendNotification("build on : " + buildResponse.OSType)
+
+		response, err := ioutil.ReadAll(buildResponse.Body)
 		if err != nil {
 			panic(err)
 		} else {
-			// timeout := 5 * 60 * 1000
-			// timeout := 30 * 1000
-			// time.Sleep(time.Duration(timeout) * time.Millisecond)
-			// cancel()
-			// response, err := ioutil.ReadAll(buildResponse.Body)
-			// if err != nil {
-			// fmt.Printf("%s", err.Error())
-			// } else {
-			// fmt.Println(string(response))
-			// }
-			// fmt.Println(string(response))
+			sendNotification(string(response))
 		}
 	}
 	return 0
@@ -184,8 +174,8 @@ func checkImage() {
 
 }
 func sendNotification(s string) {
-	// m.info = s
-	// mChan <- *m
+	m.info = s
+	MChan <- m
 }
 func clean() {
 

@@ -1,9 +1,7 @@
 package server
 
 import (
-	G "cider/global"
 	"net/http"
-	"path"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,9 +12,6 @@ func NewRouter() *gin.Engine {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 	router.Use(CorsMiddleware())
-	router.Static("/assets", path.Join(G.BasePath, "server/assets"))
-	router.LoadHTMLGlob(path.Join(G.BasePath, "server/templates/*"))
-	println(path.Join(G.BasePath, "server/templates/*"))
 	// health := new(controllers.HealthController)
 
 	router.GET("/ping", func(c *gin.Context) {
@@ -92,7 +87,8 @@ func CorsMiddleware() gin.HandlerFunc {
 		// before request
 		if c.Request.Method == "OPTIONS" {
 			c.Header("Access-Control-Allow-Origin", "*")
-			c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers, Authorization")
+			// c.Header("Content-Type", "application/x-www-form-urlencoded")
+			c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers, Authorization, Content-Type")
 			c.JSON(204, gin.H{})
 		}
 

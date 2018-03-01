@@ -37,8 +37,8 @@ func StartCD(url string, msgChan chan M) {
 	if err != nil {
 		panic(err)
 	}
-	for i := range c.Services {
-		containerName := IToC(c.Services[i].ImageName)
+	for _, app := range c.Services {
+		containerName := IToC(app.ImageName)
 		// CheckContainerExist
 		// stop and remove it if it exist
 		if id := CheckContainerExist(containerName); id != nil {
@@ -50,25 +50,29 @@ func StartCD(url string, msgChan chan M) {
 		}
 		// end CheckContainerExist
 		portsMap := nat.PortMap{}
-		for j := range c.Services[i].Ports {
-			portInfo := ParsePort(c.Services[i].Ports[j])
+		for j := range app.Ports {
+			portInfo := ParsePort(app.Ports[j])
 			portsBinding := []nat.PortBinding{{HostIP: portInfo[0][0], HostPort: portInfo[0][1]}}
 			portsMap[nat.Port(portInfo[1][0])] = portsBinding
 		}
 		hostConfig := &container.HostConfig{
-			PortBindings: portsMap,
+			PortBindings:  portsMap,
+			Binds:         app.Volumes,
+			RestartPolicy: container.RestartPolicy{Name: app.Restart, MaximumRetryCount: 3},
+			Privileged:    app.Privileged,
 		}
 
 		// container config set
 		exposePortInfo := nat.PortSet{}
-		for j := range c.Services[i].Ports {
-			portInfo := ParsePort(c.Services[i].Ports[j])
+		for j := range app.Ports {
+			portInfo := ParsePort(app.Ports[j])
 			exposePortInfo[nat.Port(portInfo[1][0])] = struct{}{}
 		}
 
 		containerConfig := &container.Config{
-			Image:        c.Services[i].ImageName,
+			Image:        app.ImageName,
 			ExposedPorts: exposePortInfo,
+			Env:          app.Environment,
 		}
 		resp, err := cli.ContainerCreate(ctx, containerConfig, hostConfig, nil, containerName)
 		if err != nil {
@@ -76,6 +80,13 @@ func StartCD(url string, msgChan chan M) {
 		}
 
 		if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+			if id := CheckContainerExist(containerName); id != nil {
+				timeout := time.Duration(10 * time.Second)
+				cli.ContainerStop(ctx, id.(string), &timeout)
+				cli.ContainerRemove(ctx, id.(string), types.ContainerRemoveOptions{
+					Force: true,
+				})
+			}
 			panic(err)
 		}
 	}

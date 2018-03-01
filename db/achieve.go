@@ -16,6 +16,19 @@ func (p *ProjectTable) FindByID(id int) []Project {
 	return res
 }
 
+func (p *ProjectTable) FindByName(projectName string) []Project {
+	var res []Project
+	if 0 < p.Size() {
+		for _, _p := range *p {
+			if _p.ProjectName == projectName {
+				res = make([]Project, 1)
+				res[0] = *_p
+			}
+		}
+	}
+	return res
+}
+
 func (p *ProjectTable) FindAll() []Project {
 	res := make([]Project, p.Size())
 	for index := 0; index < p.Size(); index++ {

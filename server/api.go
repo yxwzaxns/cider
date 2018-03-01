@@ -3,6 +3,7 @@ package server
 import (
 	"cider/db"
 	G "cider/global"
+	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -20,8 +21,31 @@ type User struct {
 func GithubHook(c *gin.Context) {
 	// check Auth
 
-	// call start Continuous integration
+	payloadJsonString := c.PostForm("payload")
 
+	var f interface{}
+
+	if err := json.Unmarshal([]byte(payloadJsonString), &f); err != nil {
+		panic(err)
+	}
+
+	var projectName string
+	if firstParseJSON, ok := f.(map[string]interface{}); ok {
+		pusher := firstParseJSON["repository"].(map[string]interface{})
+		for k, v := range pusher {
+			if k == "full_name" {
+				projectName = v.(string)
+			}
+		}
+	} else {
+		panic(ok)
+	}
+
+	G.Core.AddTask("github.com/" + projectName)
+
+	c.JSON(200, gin.H{
+		"status": "ok",
+	})
 }
 
 //GitlabHook xx
@@ -90,21 +114,22 @@ func getProject(c *gin.Context) {
 		projects = getAllProject()
 	}
 	c.JSON(200, gin.H{
-		"status":   "ok",
-		"projects": projects,
+		"status": "ok",
+		"data":   projects,
 	})
 }
 
 func createProject(c *gin.Context) {
-	url := c.PostForm("url")
+	// url := c.PostForm("projectURL")
+	var pr CreateProjectReq
+	c.BindJSON(&pr)
 	p := new(db.Project)
 	p.ProjectName = "aong"
-	p.ProjectURL = url
+	p.ProjectURL = pr.ProjectURL
 	G.Projects.Add(p)
 
 	c.JSON(200, gin.H{
 		"status": "ok",
-		"url":    url,
 	})
 }
 
