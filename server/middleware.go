@@ -5,7 +5,7 @@ import "github.com/gin-gonic/gin"
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// exclude auth url
-		if c.Request.RequestURI == "/api/v1/user/auth" {
+		if c.Request.RequestURI == "/api/v1/user/auth" || c.Request.RequestURI == "/api/v1/ping" {
 			c.Next()
 			return
 		}
@@ -41,6 +41,7 @@ func CorsMiddleware() gin.HandlerFunc {
 			// c.Header("Content-Type", "application/x-www-form-urlencoded")
 			c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers, Authorization, Content-Type")
 			c.JSON(204, gin.H{})
+			return
 		}
 
 		if c.Request.Header.Get("Origin") != "" {
@@ -49,7 +50,7 @@ func CorsMiddleware() gin.HandlerFunc {
 		} else {
 			c.Next()
 		}
-
+		return
 		// c.Next()
 
 		// after request

@@ -14,10 +14,13 @@ const TOKEN_TIMEOUT = 5
 
 var Tokens = make(map[string]*Token)
 
-func CheckPermit(header string) bool {
-	if Tokens["admin"].ExpireTime.After(time.Now().Local()) {
-		return true
+func CheckPermit(token string) bool {
+	if len(token) == 32 {
+		if Tokens["admin"].Token == token && Tokens["admin"].ExpireTime.After(time.Now().Local()) {
+			return true
+		}
 	}
+
 	return false
 }
 
