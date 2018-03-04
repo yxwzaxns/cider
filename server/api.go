@@ -3,17 +3,14 @@ package server
 import (
 	"cider/db"
 	G "cider/global"
+	"cider/utils"
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
-
-//User xx
-type User struct {
-	Name string `json:"name"`
-}
 
 // web hook
 
@@ -41,11 +38,17 @@ func GithubHook(c *gin.Context) {
 		panic(ok)
 	}
 
-	G.Core.AddTask("github.com/" + projectName)
+	if G.Projects.Has(projectName) != false {
+		G.Core.AddTask("github.com/" + projectName)
+		c.JSON(200, gin.H{
+			"status": "ok",
+		})
+	} else {
+		c.JSON(403, gin.H{
+			"status": "not find project",
+		})
+	}
 
-	c.JSON(200, gin.H{
-		"status": "ok",
-	})
 }
 
 //GitlabHook xx
@@ -54,17 +57,23 @@ func GitlabHook(c *gin.Context) {
 }
 
 //Login xx
-func (h User) Login(c *gin.Context) {
-	u := c.PostForm("username")
+func Auth(c *gin.Context) {
+	if key := c.PostForm("key"); key != utils.GetKey() {
+		c.JSON(200, gin.H{
+			"status": "key not match",
+		})
+	} else {
+		token := NewToken()
 
-	c.JSON(200, gin.H{
-		"status": "posted",
-		"user":   u,
-	})
+		c.JSON(200, gin.H{
+			"status": "ok",
+			"token":  token,
+		})
+	}
 }
 
 //Logout xx
-func (h User) Logout(c *gin.Context) {
+func DissAuth(c *gin.Context) {
 	u := c.PostForm("username")
 
 	c.JSON(200, gin.H{
@@ -120,11 +129,17 @@ func getProject(c *gin.Context) {
 }
 
 func createProject(c *gin.Context) {
-	// url := c.PostForm("projectURL")
+	// ProjectURL demo : yxwzaxns/cider
 	var pr CreateProjectReq
 	c.BindJSON(&pr)
+	projectInfo := strings.Split(pr.ProjectURL, "/")
+	if len(projectInfo) != 3 {
+		c.JSON(200, gin.H{
+			"status": "error projrct url",
+		})
+	}
 	p := new(db.Project)
-	p.ProjectName = "aong"
+	p.ProjectName = projectInfo[2]
 	p.ProjectURL = pr.ProjectURL
 	G.Projects.Add(p)
 

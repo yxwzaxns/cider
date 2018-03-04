@@ -12,6 +12,7 @@ func NewRouter() *gin.Engine {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 	router.Use(CorsMiddleware())
+	router.Use(AuthMiddleware())
 	// health := new(controllers.HealthController)
 
 	router.GET("/ping", func(c *gin.Context) {
@@ -41,6 +42,7 @@ func NewRouter() *gin.Engine {
 			v1.GET("ping", func(c *gin.Context) {
 				c.JSON(200, gin.H{
 					"message": "API Server Working",
+					"status":  "ok",
 				})
 			})
 			// about project
@@ -55,9 +57,8 @@ func NewRouter() *gin.Engine {
 			// about user
 			userGroup := v1.Group("user")
 			{
-				user := new(User)
-				userGroup.POST("/login", user.Login)
-				userGroup.POST("/logout", user.Logout)
+				userGroup.POST("/auth", Auth)
+				userGroup.POST("/dissauth", DissAuth)
 			}
 			// about hook
 			hookGroup := v1.Group("hook")
@@ -77,36 +78,4 @@ func NewRouter() *gin.Engine {
 		}
 	}
 	return router
-}
-
-func CorsMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// Set example variable
-		// c.Set("example", "12345")
-
-		// before request
-		if c.Request.Method == "OPTIONS" {
-			c.Header("Access-Control-Allow-Origin", "*")
-			// c.Header("Content-Type", "application/x-www-form-urlencoded")
-			c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers, Authorization, Content-Type")
-			c.JSON(204, gin.H{})
-		}
-
-		if c.Request.Header.Get("Origin") != "" {
-			c.Header("Access-Control-Allow-Origin", "*")
-			c.Next()
-		} else {
-			c.Next()
-		}
-
-		// c.Next()
-
-		// after request
-		// latency := time.Since(t)
-		// log.Print(latency)
-
-		// access the status we are sending
-		// status := c.Writer.Status()
-		// log.Println(status)
-	}
 }

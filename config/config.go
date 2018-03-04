@@ -1,6 +1,9 @@
 package config
 
-import "os"
+import (
+	"cider/utils"
+	"os"
+)
 
 // Config xx
 type Config struct {
@@ -12,11 +15,18 @@ type Config struct {
 }
 
 func (c *Config) Init() {
-	c.ListenIP = "127.0.0.1"
-	c.ListenPort = "8080"
+	if os.Getenv("CIDER_SERVER_IP") == "" {
+		c.ListenIP = "127.0.0.1"
+		os.Setenv("CIDER_SERVER_IP", "127.0.0.1")
+	}
+	if os.Getenv("CIDER_SERVER_PORT") == "" {
+		c.ListenPort = "8080"
+		os.Setenv("CIDER_SERVER_PORT", "8080")
+	}
+	if os.Getenv("CIDER_AUTH_KEY") == "" {
+		os.Setenv("CIDER_AUTH_KEY", utils.Base64Encode("admin"))
+	}
+
 	c.ContinuousIntegrationPath = "/var/"
 	c.AppDbPath = "/etc/cider/cider.db"
-}
-func (c *Config) InitEnvironmentVariable() {
-	os.Setenv("ContinuousIntegrationPath", c.ContinuousIntegrationPath)
 }

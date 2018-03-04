@@ -18,7 +18,6 @@ func Init() {
 	// CDQUEUE := make(chan string)
 	c := new(config.Config)
 	c.Init()
-	c.InitEnvironmentVariable()
 	db.Init(c.AppDbPath)
 	// rebuild database from db file
 	G.Projects.RebuildDb()
