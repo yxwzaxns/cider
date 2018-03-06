@@ -58,8 +58,11 @@ func GitlabHook(c *gin.Context) {
 
 //Login xx
 func Auth(c *gin.Context) {
-	if key := c.PostForm("key"); key != utils.GetKey() {
+	var ar AuthReq
+	c.BindJSON(&ar)
+	if ar.Key != utils.GetKey() {
 		c.JSON(200, gin.H{
+			"code":   401,
 			"status": "key not match",
 		})
 	} else {

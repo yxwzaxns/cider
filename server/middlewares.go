@@ -13,18 +13,26 @@ func AuthMiddleware() gin.HandlerFunc {
 		println("token: ", c.Request.Header.Get("Authorization"))
 		if c.Request.Header.Get("Authorization") != "" {
 			if permit := CheckPermit(c.Request.Header.Get("Authorization")); !permit {
-				// c.JSON(403, gin.H{})
-				c.AbortWithStatus(403)
-				// return
+				// c.JSON(200, gin.H{
+				// 	"code":   403,
+				// 	"status": "no access permit",
+				// })
+				c.AbortWithStatusJSON(200, gin.H{
+					"code":   403,
+					"status": "no access permit",
+				})
+				return
 			} else {
 				UpdateTokenExpireTime()
 				c.Next()
 				return
 			}
 		} else {
-			// c.JSON(403, gin.H{})
-			// return
-			c.AbortWithStatus(403)
+			c.AbortWithStatusJSON(200, gin.H{
+				"code":   403,
+				"status": "no access permit",
+			})
+			return
 		}
 
 	}
@@ -40,7 +48,7 @@ func CorsMiddleware() gin.HandlerFunc {
 			c.Header("Access-Control-Allow-Origin", "*")
 			// c.Header("Content-Type", "application/x-www-form-urlencoded")
 			c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers, Authorization, Content-Type")
-			c.JSON(204, gin.H{})
+			c.AbortWithStatusJSON(204, gin.H{})
 			return
 		}
 

@@ -15,7 +15,7 @@ const TOKEN_TIMEOUT = 5
 var Tokens = make(map[string]*Token)
 
 func CheckPermit(token string) bool {
-	if len(token) == 32 {
+	if len(token) == 32 && len(Tokens) != 0 {
 		if Tokens["admin"].Token == token && Tokens["admin"].ExpireTime.After(time.Now().Local()) {
 			return true
 		}
