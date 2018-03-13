@@ -58,7 +58,6 @@ func (p *ProjectTable) Size() int {
 }
 
 func Init(path string) {
-	path = "db/cider.db"
 	dbPath = path
 	if dbPath == "" {
 		println("dbPath is nil")
@@ -68,7 +67,6 @@ func Init(path string) {
 	// create dir if it's not exist.
 	if _, err := os.Stat(filepath.Dir(dbPath)); os.IsNotExist(err) {
 		// os.RemoveAll(path)
-		println(filepath.Dir(dbPath))
 		if err := os.MkdirAll(filepath.Dir(dbPath), 0777); err != nil {
 			println(err.Error())
 			os.Exit(1)

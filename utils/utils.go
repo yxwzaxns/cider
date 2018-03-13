@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"os"
+	"strconv"
 
 	"github.com/satori/go.uuid"
 )
@@ -23,4 +24,13 @@ func GetKey() string {
 
 func UUID() string {
 	return hex.EncodeToString(uuid.Must(uuid.NewV4()).Bytes())
+}
+
+func Itoa(i int) string {
+	return strconv.Itoa(i)
+}
+
+func Atoi(s string) int {
+	i, _ := strconv.Atoi(s)
+	return i
 }

@@ -1,8 +1,6 @@
 package server
 
 import (
-	"cider/config"
-	"cider/db"
 	G "cider/global"
 	"context"
 	"log"
@@ -16,15 +14,14 @@ import (
 func Init() {
 	// init CI/CD queue
 	// CDQUEUE := make(chan string)
-	c := new(config.Config)
-	c.Init()
-	db.Init(c.AppDbPath)
+	// c := new(config.Config)
+	// c.Init()
 	// rebuild database from db file
 	G.Projects.RebuildDb()
 
 	r := NewRouter()
 	srv := &http.Server{
-		Addr:    c.ListenIP + `:` + c.ListenPort,
+		Addr:    G.Config.ListenIP + `:` + G.Config.ListenPort,
 		Handler: r,
 	}
 

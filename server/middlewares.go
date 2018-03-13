@@ -30,7 +30,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		} else {
 			c.AbortWithStatusJSON(200, gin.H{
 				"code":   403,
-				"status": "no access permit",
+				"status": "No Token fond!",
 			})
 			return
 		}
