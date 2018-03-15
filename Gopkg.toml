@@ -60,3 +60,11 @@
 [prune]
   go-tests = true
   unused-packages = true
+
+[[override]]
+name = "github.com/satori/go.uuid"
+revision = "master"
+
+[[override]]
+name = "github.com/mholt/archiver"
+revision = "master"

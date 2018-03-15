@@ -1,19 +1,50 @@
-// Package archiver makes it super easy to create and open .zip and
-// .tar.gz files.
+// Package archiver makes it super easy to create and open .zip,
+// .tar.gz, and .tar.bz2 files.
 package archiver
 
 import (
 	"archive/zip"
+	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
-	"runtime"
 	"strings"
 )
 
-// Zip creates a .zip file in the location zipPath containing
+// Zip is for Zip format
+var Zip zipFormat
+
+func init() {
+	RegisterFormat("Zip", Zip)
+}
+
+type zipFormat struct{}
+
+func (zipFormat) Match(filename string) bool {
+	return strings.HasSuffix(strings.ToLower(filename), ".zip") || isZip(filename)
+}
+
+// isZip checks the file has the Zip format signature by reading its beginning
+// bytes and matching it against "PK\x03\x04"
+func isZip(zipPath string) bool {
+	f, err := os.Open(zipPath)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	buf := make([]byte, 4)
+	if n, err := f.Read(buf); err != nil || n < 4 {
+		return false
+	}
+
+	return bytes.Equal(buf, []byte("PK\x03\x04"))
+}
+
+// Write outputs a .zip file to the given writer with
 // the contents of files listed in filePaths. File paths
 // can be those of regular files or directories. Regular
 // files are stored at the 'root' of the archive, and
@@ -21,23 +52,34 @@ import (
 //
 // Files with an extension for formats that are already
 // compressed will be stored only, not compressed.
-func Zip(zipPath string, filePaths []string) error {
-	out, err := os.Create(zipPath)
-	if err != nil {
-		return fmt.Errorf("error creating %s: %v", zipPath, err)
-	}
-	defer out.Close()
-
-	w := zip.NewWriter(out)
+func (zipFormat) Write(output io.Writer, filePaths []string) error {
+	w := zip.NewWriter(output)
 	for _, fpath := range filePaths {
-		err = zipFile(w, fpath)
-		if err != nil {
+		if err := zipFile(w, fpath); err != nil {
 			w.Close()
 			return err
 		}
 	}
 
 	return w.Close()
+}
+
+// Make creates a .zip file in the location zipPath containing
+// the contents of files listed in filePaths. File paths
+// can be those of regular files or directories. Regular
+// files are stored at the 'root' of the archive, and
+// directories are recursively added.
+//
+// Files with an extension for formats that are already
+// compressed will be stored only, not compressed.
+func (zipFormat) Make(zipPath string, filePaths []string) error {
+	out, err := os.Create(zipPath)
+	if err != nil {
+		return fmt.Errorf("error creating %s: %v", zipPath, err)
+	}
+	defer out.Close()
+
+	return Zip.Write(out, filePaths)
 }
 
 func zipFile(w *zip.Writer, source string) error {
@@ -62,7 +104,11 @@ func zipFile(w *zip.Writer, source string) error {
 		}
 
 		if baseDir != "" {
-			header.Name = filepath.Join(baseDir, strings.TrimPrefix(fpath, source))
+			name, err := filepath.Rel(source, fpath)
+			if err != nil {
+				return err
+			}
+			header.Name = path.Join(baseDir, filepath.ToSlash(name))
 		}
 
 		if info.IsDir() {
@@ -70,7 +116,7 @@ func zipFile(w *zip.Writer, source string) error {
 			header.Method = zip.Store
 		} else {
 			ext := strings.ToLower(path.Ext(header.Name))
-			if _, ok := CompressedFormats[ext]; ok {
+			if _, ok := compressedFormats[ext]; ok {
 				header.Method = zip.Store
 			} else {
 				header.Method = zip.Deflate
@@ -93,8 +139,8 @@ func zipFile(w *zip.Writer, source string) error {
 			}
 			defer file.Close()
 
-			_, err = io.Copy(writer, file)
-			if err != nil {
+			_, err = io.CopyN(writer, file, info.Size())
+			if err != nil && err != io.EOF {
 				return fmt.Errorf("%s: copying contents: %v", fpath, err)
 			}
 		}
@@ -103,14 +149,34 @@ func zipFile(w *zip.Writer, source string) error {
 	})
 }
 
-// Unzip unzips the .zip file at source into destination.
-func Unzip(source, destination string) error {
+// Read unzips the .zip file read from the input Reader into destination.
+func (zipFormat) Read(input io.Reader, destination string) error {
+	buf, err := ioutil.ReadAll(input)
+	if err != nil {
+		return err
+	}
+
+	rdr := bytes.NewReader(buf)
+	r, err := zip.NewReader(rdr, rdr.Size())
+	if err != nil {
+		return err
+	}
+
+	return unzipAll(r, destination)
+}
+
+// Open unzips the .zip file at source into destination.
+func (zipFormat) Open(source, destination string) error {
 	r, err := zip.OpenReader(source)
 	if err != nil {
 		return err
 	}
 	defer r.Close()
 
+	return unzipAll(&r.Reader, destination)
+}
+
+func unzipAll(r *zip.Reader, destination string) error {
 	for _, zf := range r.File {
 		if err := unzipFile(zf, destination); err != nil {
 			return err
@@ -134,62 +200,19 @@ func unzipFile(zf *zip.File, destination string) error {
 	return writeNewFile(filepath.Join(destination, zf.Name), rc, zf.FileInfo().Mode())
 }
 
-func writeNewFile(fpath string, in io.Reader, fm os.FileMode) error {
-	err := os.MkdirAll(path.Dir(fpath), 0755)
-	if err != nil {
-		return fmt.Errorf("%s: making directory for file: %v", fpath, err)
-	}
-
-	out, err := os.Create(fpath)
-	if err != nil {
-		return fmt.Errorf("%s: creating new file: %v", fpath, err)
-	}
-	defer out.Close()
-
-	err = out.Chmod(fm)
-	if err != nil && runtime.GOOS != "windows" {
-		return fmt.Errorf("%s: changing file mode: %v", fpath, err)
-	}
-
-	_, err = io.Copy(out, in)
-	if err != nil {
-		return fmt.Errorf("%s: writing file: %v", fpath, err)
-	}
-	return nil
-}
-
-func writeNewSymbolicLink(fpath string, target string) error {
-	err := os.MkdirAll(path.Dir(fpath), 0755)
-	if err != nil {
-		return fmt.Errorf("%s: making directory for file: %v", fpath, err)
-	}
-
-	err = os.Symlink(target, fpath)
-	if err != nil {
-		return fmt.Errorf("%s: making symbolic link for: %v", fpath, err)
-	}
-
-	return nil
-}
-
-func mkdir(dirPath string) error {
-	err := os.Mkdir(dirPath, 0755)
-	if err != nil {
-		return fmt.Errorf("%s: making directory: %v", dirPath, err)
-	}
-	return nil
-}
-
-// CompressedFormats is a set of lowercased file extensions
-// for file formats that are typically already compressed.
-// Compressing already-compressed files often results in
-// a larger file. This list is not an exhaustive.
-var CompressedFormats = map[string]struct{}{
+// compressedFormats is a (non-exhaustive) set of lowercased
+// file extensions for formats that are typically already
+// compressed. Compressing already-compressed files often
+// results in a larger file, so when possible, we check this
+// set to avoid that.
+var compressedFormats = map[string]struct{}{
 	".7z":   {},
 	".avi":  {},
 	".bz2":  {},
+	".cab":  {},
 	".gif":  {},
 	".gz":   {},
+	".jar":  {},
 	".jpeg": {},
 	".jpg":  {},
 	".lz":   {},
@@ -201,15 +224,10 @@ var CompressedFormats = map[string]struct{}{
 	".mpg":  {},
 	".png":  {},
 	".rar":  {},
+	".tbz2": {},
+	".tgz":  {},
+	".txz":  {},
 	".xz":   {},
 	".zip":  {},
 	".zipx": {},
 }
-
-type (
-	// CompressFunc is a function that makes an archive.
-	CompressFunc func(string, []string) error
-
-	// DecompressFunc is a function that extracts an archive.
-	DecompressFunc func(string, string) error
-)
