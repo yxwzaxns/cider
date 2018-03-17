@@ -52,6 +52,7 @@ func NewRouter() *gin.Engine {
 				// projectGroup.OPTIONS("/:id", preflight)
 				projectGroup.GET("/:id/:action", dealProject)
 				projectGroup.POST("/", createProject)
+				projectGroup.PUT("/:id/:action", updateProject)
 				projectGroup.DELETE("/", deleteProject)
 			}
 			// about user

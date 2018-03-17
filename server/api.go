@@ -112,6 +112,33 @@ func dealProject(c *gin.Context) {
 		})
 	}
 }
+func updateProject(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	action := c.Param("action")
+	switch action {
+	case "":
+		project := G.Projects.FindByID(id)
+		G.Core.RemoveTask(project[0].ProjectURL)
+		c.JSON(200, gin.H{
+			"status": "ok",
+			"info":   "stop req submit",
+		})
+		break
+	case "submit":
+		project := G.Projects.FindByID(id)
+		G.Core.AddTask(project[0].ProjectURL)
+		c.JSON(200, gin.H{
+			"status": "ok",
+			"info":   "submit req submit",
+		})
+		break
+	default:
+		c.JSON(200, gin.H{
+			"status": "error",
+			"reason": "unknown req : " + action,
+		})
+	}
+}
 func getAllProject() []db.Project {
 	projects := G.Projects.FindAll()
 	return projects

@@ -1,0 +1,12 @@
+2018-03-17 15:05:27 /Users/aong/workspace/go/src/cider/test/golangHelpr/loggingr.go:57 main ▶ DEBU 001 debug secret
+2018-03-17 15:05:27 /Users/aong/workspace/go/src/cider/test/golangHelpr/loggingr.go:58 main ▶ INFO 002 info
+2018-03-17 15:05:27 /Users/aong/workspace/go/src/cider/test/golangHelpr/loggingr.go:59 main ▶ NOTI 003 notice
+2018-03-17 15:05:27 /Users/aong/workspace/go/src/cider/test/golangHelpr/loggingr.go:60 main ▶ WARN 004 warning
+2018-03-17 15:05:27 /Users/aong/workspace/go/src/cider/test/golangHelpr/loggingr.go:61 main ▶ ERRO 005 err
+2018-03-17 15:05:27 /Users/aong/workspace/go/src/cider/test/golangHelpr/loggingr.go:62 main ▶ CRIT 006 crit
+2018-03-17 15:05:36 /Users/aong/workspace/go/src/cider/test/golangHelpr/loggingr.go:57 main ▶ DEBU 001 debug secret
+2018-03-17 15:05:36 /Users/aong/workspace/go/src/cider/test/golangHelpr/loggingr.go:58 main ▶ INFO 002 info
+2018-03-17 15:05:36 /Users/aong/workspace/go/src/cider/test/golangHelpr/loggingr.go:59 main ▶ NOTI 003 notice
+2018-03-17 15:05:36 /Users/aong/workspace/go/src/cider/test/golangHelpr/loggingr.go:60 main ▶ WARN 004 warning
+2018-03-17 15:05:36 /Users/aong/workspace/go/src/cider/test/golangHelpr/loggingr.go:61 main ▶ ERRO 005 err
+2018-03-17 15:05:36 /Users/aong/workspace/go/src/cider/test/golangHelpr/loggingr.go:62 main ▶ CRIT 006 crit

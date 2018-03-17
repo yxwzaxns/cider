@@ -3,6 +3,8 @@ package utils
 import (
 	"encoding/base64"
 	"encoding/hex"
+	"io"
+	"log"
 	"os"
 	"strconv"
 
@@ -33,4 +35,13 @@ func Itoa(i int) string {
 func Atoi(s string) int {
 	i, _ := strconv.Atoi(s)
 	return i
+}
+
+func OpenFile(path string) io.Writer {
+	if f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644); err != nil {
+		log.Fatal(err)
+	} else {
+		return f
+	}
+	return nil
 }

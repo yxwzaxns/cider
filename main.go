@@ -20,8 +20,8 @@ func main() {
 	app.Action = func(c *cli.Context) error {
 		conf := new(config.Config)
 		conf.Init()
-		G.Init()
 		G.ImportConfig(conf)
+		G.Init()
 		db.Init(G.Config.AppDbPath)
 
 		server.Init()

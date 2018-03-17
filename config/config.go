@@ -11,7 +11,10 @@ type Config struct {
 	ListenPort                string
 	ContinuousIntegrationPath string
 	// ContinuousDistribution
-	AppDbPath    string
+	Debug     bool
+	AppDbPath string
+	LogPath   string
+
 	AuthKey      string
 	TokenTimeout int
 }
@@ -46,10 +49,27 @@ func (c *Config) Init() {
 	}
 
 	if os.Getenv("CIDER_DB_PATH") == "" {
+		// c.AppDbPath = "/usr/local/cider/cider.db"
 		c.AppDbPath = "/tmp/cider/cider.db"
 		os.Setenv("CIDER_DB_PATH", c.AppDbPath)
 	} else {
+		c.AppDbPath = os.Getenv("CIDER_DB_PATH")
+	}
 
+	if os.Getenv("CIDER_DEBUG") == "false" {
+		c.Debug = false
+		os.Setenv("CIDER_DEBUG", "false")
+	} else {
+		c.Debug = true
+		os.Setenv("CIDER_DEBUG", "true")
+	}
+
+	if os.Getenv("CIDER_LOGPATH") == "" {
+		// c.LogPath = "/var/log/cider/cider.log"
+		c.LogPath = "/tmp/cider/cider.log"
+		os.Setenv("CIDER_LOGPATH", c.LogPath)
+	} else {
+		c.LogPath = os.Getenv("CIDER_LOGPATH")
 	}
 
 	c.ContinuousIntegrationPath = "/var/"
