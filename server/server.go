@@ -11,11 +11,8 @@ import (
 
 // Init xx
 func Init() {
-	// init CI/CD queue
-	// CDQUEUE := make(chan string)
-	// c := new(config.Config)
-	// c.Init()
-	// rebuild database from db file
+
+	// rebuild database from db file if need to do
 	G.Projects.RebuildDb()
 
 	r := NewRouter()

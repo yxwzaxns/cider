@@ -7,3 +7,7 @@ type CreateProjectReq struct {
 type AuthReq struct {
 	Key string `json:"key" binding:"required"`
 }
+
+type UpdateProjectItem struct {
+	Field string `json:"field" binding:"required"`
+}

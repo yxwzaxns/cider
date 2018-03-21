@@ -48,11 +48,11 @@ func NewRouter() *gin.Engine {
 			// about project
 			projectGroup := v1.Group("project")
 			{
-				projectGroup.GET("/:id", getProject)
+				projectGroup.GET("/:name", getProject)
 				// projectGroup.OPTIONS("/:id", preflight)
-				projectGroup.GET("/:id/:action", dealProject)
+				projectGroup.GET("/:name/:action", dealProject)
 				projectGroup.POST("/", createProject)
-				projectGroup.PUT("/:id/:action", updateProject)
+				projectGroup.PUT("/:name/update", updateProject)
 				projectGroup.DELETE("/", deleteProject)
 			}
 			// about user

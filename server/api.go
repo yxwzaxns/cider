@@ -113,49 +113,35 @@ func dealProject(c *gin.Context) {
 	}
 }
 func updateProject(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
-	action := c.Param("action")
-	switch action {
-	case "":
-		project := G.Projects.FindByID(id)
-		G.Core.RemoveTask(project[0].ProjectURL)
-		c.JSON(200, gin.H{
-			"status": "ok",
-			"info":   "stop req submit",
-		})
-		break
-	case "submit":
-		project := G.Projects.FindByID(id)
-		G.Core.AddTask(project[0].ProjectURL)
-		c.JSON(200, gin.H{
-			"status": "ok",
-			"info":   "submit req submit",
-		})
-		break
-	default:
-		c.JSON(200, gin.H{
-			"status": "error",
-			"reason": "unknown req : " + action,
-		})
-	}
-}
-func getAllProject() []db.Project {
-	projects := G.Projects.FindAll()
-	return projects
-}
+	project := G.Projects.Get(c.Param("name"))
+	var projectItem UpdateProjectItem
+	c.BindJSON(&projectItem)
+	var field, value = utils.ParseField(projectItem.Field)
+	G.Projects.Get(project.ProjectName).Update(field, value)
 
-func getProject(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
-	var projects []db.Project
-	if id != 0 {
-		projects = G.Projects.FindByID(id)
-	} else {
-		projects = getAllProject()
-	}
+	c.JSON(200, gin.H{
+		"status": G.Projects.Get(project.ProjectName),
+	})
+}
+func getAllProject(c *gin.Context) {
+	projects := G.Projects.FindAll()
 	c.JSON(200, gin.H{
 		"status": "ok",
 		"data":   projects,
 	})
+}
+
+func getProject(c *gin.Context) {
+	n := c.Param("name")
+	if n == "all" {
+		getAllProject(c)
+	} else {
+		projects := G.Projects.Get(n)
+		c.JSON(200, gin.H{
+			"status": "ok",
+			"data":   projects,
+		})
+	}
 }
 
 func createProject(c *gin.Context) {

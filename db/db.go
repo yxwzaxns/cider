@@ -3,17 +3,18 @@ package db
 var dbPath string
 
 type ProjectStatus struct {
-	Avtive        bool
+	Active        bool
 	CiStatus      string
 	CdStatus      string
 	CurrentStatus string
 }
 
-type Project struct {
-	ProjectName string
-	ProjectURL  string
-	CreatedTime string
+type Log struct {
+	LastTime string
+	LastLog  string
+}
 
+type ProjectSetting struct {
 	AutoBuild  bool
 	AutoDeploy bool
 
@@ -22,8 +23,15 @@ type Project struct {
 	Email          string
 
 	PauseServer bool
+}
+type Project struct {
+	ProjectName string
+	ProjectURL  string
+	CreatedTime string
 
+	ProjectSetting
 	ProjectStatus
+	Log
 }
 
 type ProjectTable [](*Project)

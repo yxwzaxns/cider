@@ -7,56 +7,6 @@ import (
 	"path/filepath"
 )
 
-func (p *ProjectTable) FindByID(id int) []Project {
-	var res []Project
-	if id <= p.Size() {
-		res = make([]Project, 1)
-		res[0] = *(*p)[id-1]
-	}
-	return res
-}
-
-func (p *ProjectTable) FindByName(projectName string) interface{} {
-	var res []Project
-	if 0 < p.Size() {
-		for _, _p := range *p {
-			if _p.ProjectName == projectName {
-				res = make([]Project, 1)
-				res[0] = *_p
-			}
-		}
-		return res
-	}
-	return nil
-}
-
-func (p *ProjectTable) Has(projectName string) bool {
-	if 0 < p.Size() {
-		for _, _p := range *p {
-			if _p.ProjectName == projectName {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func (p *ProjectTable) FindAll() []Project {
-	res := make([]Project, p.Size())
-	for index := 0; index < p.Size(); index++ {
-		res[index] = *(*p)[index]
-	}
-	return res
-}
-
-func (p *ProjectTable) Add(project *Project) {
-	*p = append(*p, project)
-}
-
-func (p *ProjectTable) Size() int {
-	return len(*p)
-}
-
 func Init(path string) {
 	dbPath = path
 	if dbPath == "" {

@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/satori/go.uuid"
 )
@@ -44,4 +45,16 @@ func OpenFile(path string) io.Writer {
 		return f
 	}
 	return nil
+}
+
+func ParseField(field string) (k string, v interface{}) {
+	kv := strings.Split(field, ":")
+	switch kv[1] {
+	case "1":
+		return kv[0], true
+	case "0":
+		return kv[0], false
+	default:
+		return kv[0], kv[1]
+	}
 }
