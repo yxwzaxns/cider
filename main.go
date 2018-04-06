@@ -1,12 +1,14 @@
 package main
 
 import (
-	"cider/config"
-	"cider/db"
-	G "cider/global"
-	"cider/server"
 	"log"
 	"os"
+
+	"github.com/yxwzaxns/cider/db"
+	"github.com/yxwzaxns/cider/global"
+	"github.com/yxwzaxns/cider/server"
+
+	"github.com/yxwzaxns/cider/config"
 
 	"github.com/urfave/cli"
 )
@@ -18,12 +20,9 @@ func main() {
 	app.Name = "cider"
 	app.Usage = "Cider is a concise CI/CD tool for docker!"
 	app.Action = func(c *cli.Context) error {
-		conf := new(config.Config)
-		conf.Init()
-		G.ImportConfig(conf)
-		G.Init()
-		db.Init(G.Config.AppDbPath)
-
+		global.Init()
+		config.Init()
+		db.Init(config.Conf.AppDbPath)
 		server.Init()
 		return nil
 	}

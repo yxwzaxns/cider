@@ -8,10 +8,11 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
+	ciderTypes "github.com/yxwzaxns/cider/types"
 )
 
 func TestStartCD(t *testing.T) {
-	mChan := make(chan M, 10)
+	mChan := make(chan ciderTypes.CR, 10)
 	imageName := "github.com/yxwzaxns/cider-ci-test"
 	os.Setenv("DOCKER_API_VERSION", "1.35")
 	println("start test cd")

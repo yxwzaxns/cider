@@ -11,10 +11,11 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
+	ciderTypes "github.com/yxwzaxns/cider/types"
 	yaml "gopkg.in/yaml.v2"
 )
 
-func StartCD(url string, msgChan chan M) {
+func StartCD(url string, msgChan chan ciderTypes.CR) {
 	// imageName := url + ":" + "latest"
 	if WorkPath == "" {
 		basePath := filepath.Join(RootDir, "cider_workspace")

@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/satori/go.uuid"
 )
@@ -56,5 +57,24 @@ func ParseField(field string) (k string, v interface{}) {
 		return kv[0], false
 	default:
 		return kv[0], kv[1]
+	}
+}
+
+func GetEnv(name string) string {
+	return os.Getenv(name)
+}
+
+func IsProduction() bool {
+	if GetEnv("CIDER_DEBUG") == "false" {
+		return true
+	} else {
+		return false
+	}
+}
+func GetTokenTimeOut() time.Duration {
+	if t, err := strconv.ParseInt(GetEnv("CIDER_TOKEN_TIMEOUT"), 10, 64); err != nil {
+		panic(err)
+	} else {
+		return time.Duration(t)
 	}
 }

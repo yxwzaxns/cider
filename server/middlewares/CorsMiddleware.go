@@ -1,42 +1,6 @@
-package server
+package middleware
 
 import "github.com/gin-gonic/gin"
-
-func AuthMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// exclude auth url
-		if c.Request.RequestURI == "/api/v1/user/auth" || c.Request.RequestURI == "/api/v1/ping" {
-			c.Next()
-			return
-		}
-		//
-		println("token: ", c.Request.Header.Get("Authorization"))
-		if c.Request.Header.Get("Authorization") != "" {
-			if permit := CheckPermit(c.Request.Header.Get("Authorization")); !permit {
-				// c.JSON(200, gin.H{
-				// 	"code":   403,
-				// 	"status": "no access permit",
-				// })
-				c.AbortWithStatusJSON(200, gin.H{
-					"code":   403,
-					"status": "no access permit",
-				})
-				return
-			} else {
-				UpdateTokenExpireTime()
-				c.Next()
-				return
-			}
-		} else {
-			c.AbortWithStatusJSON(200, gin.H{
-				"code":   403,
-				"status": "No Token fond!",
-			})
-			return
-		}
-
-	}
-}
 
 func CorsMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {

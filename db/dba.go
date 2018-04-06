@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 )
 
+var Projects ProjectTable
+
 func Init(path string) {
 	dbPath = path
 	if dbPath == "" {
@@ -33,7 +35,7 @@ func Init(path string) {
 	}
 }
 
-func (p *ProjectTable) RebuildDb() {
+func RebuildDb() {
 	if dbFile, err := os.OpenFile(dbPath, os.O_RDWR, 0644); err != nil {
 		panic(err)
 	} else {
@@ -42,7 +44,7 @@ func (p *ProjectTable) RebuildDb() {
 		} else {
 			if fileInfo.Size() != 0 {
 				enc := gob.NewDecoder(dbFile)
-				if err := enc.Decode(p); err != nil {
+				if err := enc.Decode(&Projects); err != nil {
 					panic(err)
 				} else {
 					fmt.Println("rebuild db completed")
@@ -55,15 +57,15 @@ func (p *ProjectTable) RebuildDb() {
 	}
 }
 
-func (p *ProjectTable) SaveDb() {
-	if size := p.Size(); size == 0 {
+func SaveDb() {
+	if size := Projects.Size(); size == 0 {
 		println("don't need to save the data !")
 	} else {
 		if dbFile, err := os.OpenFile(dbPath, os.O_RDWR, 0644); err != nil {
 			panic(err.Error())
 		} else {
 			enc := gob.NewEncoder(dbFile)
-			if err := enc.Encode(p); err != nil {
+			if err := enc.Encode(Projects); err != nil {
 				fmt.Println(err)
 			}
 			defer dbFile.Close()

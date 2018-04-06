@@ -4,18 +4,20 @@ import (
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/yxwzaxns/cider/types"
 )
 
 func TestStartCI(t *testing.T) {
-	mChan := make(chan M, 10)
+	mChan := make(chan types.CR, 10)
 	codeURL := "github.com/yxwzaxns/aong-ghost"
 	println("start test ci")
-	go func(mChan chan M) {
+	go func(mChan chan types.CR) {
 		for {
 			time.Sleep(500 * time.Millisecond)
 			if len(mChan) != 0 {
 				m := <-mChan
-				fmt.Println("<-------------", m.info, "--------------->")
+				fmt.Println("<-------------", m.Message, "--------------->")
 			}
 		}
 	}(mChan)

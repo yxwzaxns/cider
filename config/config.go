@@ -1,9 +1,12 @@
 package config
 
 import (
-	"cider/utils"
 	"os"
+
+	"github.com/yxwzaxns/cider/utils"
 )
+
+var Conf *Config
 
 // Config xx
 type Config struct {
@@ -19,7 +22,7 @@ type Config struct {
 	TokenTimeout int
 }
 
-func (c *Config) Init() {
+func (c *Config) setConf() {
 	if os.Getenv("CIDER_SERVER_IP") == "" {
 		c.ListenIP = "127.0.0.1"
 		os.Setenv("CIDER_SERVER_IP", c.ListenIP)
@@ -74,4 +77,10 @@ func (c *Config) Init() {
 
 	c.ContinuousIntegrationPath = "/var/"
 
+}
+
+func Init() {
+	Conf = new(Config)
+	Conf.setConf()
+	LogInit()
 }

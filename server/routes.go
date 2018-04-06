@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yxwzaxns/cider/server/middlewares"
 )
 
 //NewRouter xx
@@ -11,8 +12,8 @@ func NewRouter() *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
-	router.Use(CorsMiddleware())
-	router.Use(AuthMiddleware())
+	router.Use(middleware.CorsMiddleware())
+	router.Use(middleware.AuthMiddleware())
 	// health := new(controllers.HealthController)
 
 	router.GET("/ping", func(c *gin.Context) {
@@ -28,8 +29,8 @@ func NewRouter() *gin.Engine {
 	dashboard := router.Group("dashboard")
 	{
 		dashboard.GET("/", func(c *gin.Context) {
-			c.HTML(http.StatusOK, "index.tmpl", gin.H{
-				"title": "cider system dashboard",
+			c.JSON(200, gin.H{
+				"message": "Cider System Is Running.",
 			})
 		})
 	}

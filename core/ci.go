@@ -14,6 +14,8 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/mholt/archiver"
 
+	ciderTypes "github.com/yxwzaxns/cider/types"
+
 	git "gopkg.in/src-d/go-git.v4"
 )
 
@@ -21,24 +23,24 @@ var (
 	CodeURL          string
 	WorkPath         string
 	RootDir          string
-	MChan            chan M
-	m                M
 	DockerAPIVersion float64
+	MChan            chan ciderTypes.CR
+	M                ciderTypes.CR
 )
 
 func init() {
 	CodeURL = ""
 	WorkPath = ""
 	RootDir = "/tmp"
-	m = M{}
 	DockerAPIVersion = 1.36
 }
 
 // url is "github.com/username/projectName"
-func StartCI(url string, msgChan chan M) {
+func StartCI(url string, msgChan chan ciderTypes.CR) {
 	MChan = msgChan
 	CodeURL = url
-	m.URL = url
+	M.ProjectName = url
+	M.TaskStage = "CI"
 	// time.Sleep(50000 * time.Millisecond)
 	initWorkDir()
 	sendNotification("initWorkDir finished")
@@ -174,8 +176,8 @@ func checkImage() {
 
 }
 func sendNotification(s string) {
-	m.info = s
-	MChan <- m
+	M.Message = s
+	MChan <- M
 }
 func clean() {
 

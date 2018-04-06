@@ -1,15 +1,17 @@
 package server
 
 import (
-	"cider/db"
-	G "cider/global"
-	"cider/utils"
 	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
 
+	"github.com/yxwzaxns/cider/utils"
+
 	"github.com/gin-gonic/gin"
+	"github.com/yxwzaxns/cider/core"
+	"github.com/yxwzaxns/cider/db"
+	"github.com/yxwzaxns/cider/server/middlewares"
 )
 
 // web hook
@@ -38,8 +40,8 @@ func GithubHook(c *gin.Context) {
 		panic(ok)
 	}
 
-	if G.Projects.Has(projectName) != false {
-		G.Core.AddTask("github.com/" + projectName)
+	if db.Projects.Has(projectName) != false {
+		core.Core.AddTask("github.com/" + projectName)
 		c.JSON(200, gin.H{
 			"status": "ok",
 		})
@@ -56,7 +58,7 @@ func GitlabHook(c *gin.Context) {
 
 }
 
-//Login xx
+//Auth xx
 func Auth(c *gin.Context) {
 	var ar AuthReq
 	c.BindJSON(&ar)
@@ -66,7 +68,7 @@ func Auth(c *gin.Context) {
 			"status": "key not match",
 		})
 	} else {
-		token := NewToken()
+		token := middleware.NewToken()
 
 		c.JSON(200, gin.H{
 			"status": "ok",
@@ -90,16 +92,16 @@ func dealProject(c *gin.Context) {
 	action := c.Param("action")
 	switch action {
 	case "stop":
-		project := G.Projects.FindByID(id)
-		G.Core.RemoveTask(project[0].ProjectURL)
+		project := db.Projects.FindByID(id)
+		core.Core.RemoveTask(project[0].ProjectURL)
 		c.JSON(200, gin.H{
 			"status": "ok",
 			"info":   "stop req submit",
 		})
 		break
 	case "submit":
-		project := G.Projects.FindByID(id)
-		G.Core.AddTask(project[0].ProjectURL)
+		project := db.Projects.FindByID(id)
+		core.Core.AddTask(project[0].ProjectURL)
 		c.JSON(200, gin.H{
 			"status": "ok",
 			"info":   "submit req submit",
@@ -113,18 +115,18 @@ func dealProject(c *gin.Context) {
 	}
 }
 func updateProject(c *gin.Context) {
-	project := G.Projects.Get(c.Param("name"))
+	project := db.Projects.Get(c.Param("name"))
 	var projectItem UpdateProjectItem
 	c.BindJSON(&projectItem)
 	var field, value = utils.ParseField(projectItem.Field)
-	G.Projects.Get(project.ProjectName).Update(field, value)
+	db.Projects.Get(project.ProjectName).Update(field, value)
 
 	c.JSON(200, gin.H{
-		"status": G.Projects.Get(project.ProjectName),
+		"status": db.Projects.Get(project.ProjectName),
 	})
 }
 func getAllProject(c *gin.Context) {
-	projects := G.Projects.FindAll()
+	projects := db.Projects.FindAll()
 	c.JSON(200, gin.H{
 		"status": "ok",
 		"data":   projects,
@@ -136,7 +138,7 @@ func getProject(c *gin.Context) {
 	if n == "all" {
 		getAllProject(c)
 	} else {
-		projects := G.Projects.Get(n)
+		projects := db.Projects.Get(n)
 		c.JSON(200, gin.H{
 			"status": "ok",
 			"data":   projects,
@@ -157,7 +159,7 @@ func createProject(c *gin.Context) {
 	p := new(db.Project)
 	p.ProjectName = projectInfo[2]
 	p.ProjectURL = pr.ProjectURL
-	G.Projects.Add(p)
+	db.Projects.Add(p)
 
 	c.JSON(200, gin.H{
 		"status": "ok",
@@ -175,7 +177,7 @@ func coreCheck(c *gin.Context) {
 	item := c.Param("item")
 	switch item {
 	case "chan":
-		G.EventsChan <- item
+		// EventsChan <- item
 		break
 	default:
 		break
@@ -186,8 +188,8 @@ func coreCheck(c *gin.Context) {
 }
 
 func getTasks(c *gin.Context) {
-	taskCount := G.Core.GetTaskCount()
-	activeTaskCount := G.Core.GetActiveTaskCount()
+	taskCount := core.Core.GetTaskCount()
+	activeTaskCount := core.Core.GetActiveTaskCount()
 	res := fmt.Sprintf("{'tasks count': %d,'active tasks count':%d}", taskCount, activeTaskCount)
 	c.JSON(200, gin.H{
 		"status":    "ok",

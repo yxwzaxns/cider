@@ -9,29 +9,34 @@ type Task struct {
 type tasks [](*Task)
 
 func (t *Task) Run() {
-	t.Init()
+	t.Ready()
 	t.CI()
 	t.CD()
 	t.Done()
 }
-func (t *Task) Init() {
+func (t *Task) Ready() {
 	t.Active = true
 	// fmt.Printf("goroutine :  %p", t)
 	// randTime := rand.Intn(10000)
 }
 func (t *Task) CI() {
 	t.Status = "CI"
-	StartCI(t.URL, ciChan)
+	StartCI(t.URL, EventChan)
 }
 func (t *Task) CD() {
 	t.Status = "CD"
-	StartCD(t.URL, cdChan)
+	StartCD(t.URL, EventChan)
 }
 func (t *Task) Done() {
 	t.Active = false
 	t.Status = "finished"
-	res := t.URL + "finished"
-	eventsChan <- res
+	res := t.URL + "  finished"
+
+	// M := new(ciderTypes.CR)
+	M.ProjectName = t.URL
+	M.TaskStage = "DONE"
+	M.Message = res
+	EventChan <- M
 }
 
 func (t *tasks) CreateTask(project string) {
