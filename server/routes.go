@@ -54,7 +54,7 @@ func NewRouter() *gin.Engine {
 				projectGroup.GET("/:name/:action", dealProject)
 				projectGroup.POST("/", createProject)
 				projectGroup.PUT("/:name/update", updateProject)
-				projectGroup.DELETE("/", deleteProject)
+				projectGroup.DELETE("/:name", deleteProject)
 			}
 			// about user
 			userGroup := v1.Group("user")
@@ -67,6 +67,7 @@ func NewRouter() *gin.Engine {
 			{
 				hookGroup.POST("/github", GithubHook)
 				hookGroup.POST("/gitlab", GitlabHook)
+				hookGroup.GET("/test", TestHook)
 			}
 			// about core
 			coreGroup := v1.Group("core")

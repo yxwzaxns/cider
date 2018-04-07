@@ -21,10 +21,15 @@ func split(s string, spe string) {
 	println(len(strings.Split(s, spe)))
 }
 
+func addition(a string, b string) string {
+	return a + b
+}
+
 // var s = "adf"
 
 func main() {
 	// rege("Error response from daemon: client version 1.36 is too new. Maximum supported API version is 1.35")
 	// println(getString("github.com/yxwzaxns/cider-ci-test"))
-	split("github.com/yxwzaxns/cider", "/")
+	// split("github.com/yxwzaxns/cider", "/")
+	println(addition("yxwzanxs", "/cider"))
 }

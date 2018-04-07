@@ -1,5 +1,12 @@
 package db
 
+import (
+	"errors"
+	"strings"
+
+	"github.com/yxwzaxns/cider/utils"
+)
+
 func (p *ProjectTable) FindByID(id int) []Project {
 	var res []Project
 	if id <= p.Size() {
@@ -57,6 +64,19 @@ func (p *Project) Update(field string, value interface{}) {
 		break
 	}
 }
+
+func (p *Project) Delete() bool {
+	for i, _p := range Projects {
+		if _p.ProjectName == p.ProjectName {
+			Projects = append(Projects[:i], Projects[i+1:]...)
+		}
+	}
+	if !Projects.Has(p.ProjectName) {
+		return true
+	}
+	return false
+}
+
 func (p *ProjectTable) Has(projectName string) bool {
 	if 0 < p.Size() {
 		for _, _p := range *p {
@@ -68,6 +88,39 @@ func (p *ProjectTable) Has(projectName string) bool {
 	return false
 }
 
+func (p *ProjectTable) Create(url string) error {
+	// detecting whether a project is exists or not.
+	projectInfo := strings.Split(url, "/")
+	if p.Has(projectInfo[2]) {
+		return errors.New("Project has exists")
+	}
+	// create a new project.
+	np := new(Project)
+	np.ProjectName = projectInfo[2]
+	np.ProjectURL = url
+	np.CreatedTime = utils.GetCurrentTime()
+
+	// np.ProjectStatus
+	np.Active = false
+	np.CdStatus = ""
+	np.CiStatus = ""
+	np.CurrentStatus = ""
+
+	// np.ProjectSetting
+	np.AutoBuild = true
+	np.AutoDeploy = true
+	np.CDNotification = false
+	np.CINotification = false
+	np.PauseServer = false
+	np.Email = ""
+
+	// np.Log
+	np.Log.LastLog = ""
+	np.Log.LastTime = ""
+
+	p.Add(np)
+	return nil
+}
 func (p *ProjectTable) FindAll() []Project {
 	res := make([]Project, p.Size())
 	for index := 0; index < p.Size(); index++ {

@@ -9,6 +9,7 @@ import (
 	"github.com/yxwzaxns/cider/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yxwzaxns/cider/config"
 	"github.com/yxwzaxns/cider/core"
 	"github.com/yxwzaxns/cider/db"
 	"github.com/yxwzaxns/cider/server/middlewares"
@@ -20,11 +21,11 @@ import (
 func GithubHook(c *gin.Context) {
 	// check Auth
 
-	payloadJsonString := c.PostForm("payload")
+	payloadJSONString := c.PostForm("payload")
 
 	var f interface{}
 
-	if err := json.Unmarshal([]byte(payloadJsonString), &f); err != nil {
+	if err := json.Unmarshal([]byte(payloadJSONString), &f); err != nil {
 		panic(err)
 	}
 
@@ -32,7 +33,7 @@ func GithubHook(c *gin.Context) {
 	if firstParseJSON, ok := f.(map[string]interface{}); ok {
 		pusher := firstParseJSON["repository"].(map[string]interface{})
 		for k, v := range pusher {
-			if k == "full_name" {
+			if k == "name" {
 				projectName = v.(string)
 			}
 		}
@@ -40,8 +41,8 @@ func GithubHook(c *gin.Context) {
 		panic(ok)
 	}
 
-	if db.Projects.Has(projectName) != false {
-		core.Core.AddTask("github.com/" + projectName)
+	if project := db.Projects.Get(projectName); project != nil {
+		core.Core.AddTask(project.ProjectURL)
 		c.JSON(200, gin.H{
 			"status": "ok",
 		})
@@ -56,6 +57,12 @@ func GithubHook(c *gin.Context) {
 //GitlabHook xx
 func GitlabHook(c *gin.Context) {
 
+}
+
+//TestHook is test of system
+func TestHook(c *gin.Context) {
+	config.Log.Debug("start test system")
+	core.Core.AddTask("github.com/yxwzaxns/cider-ci-test")
 }
 
 //Auth xx
@@ -77,7 +84,7 @@ func Auth(c *gin.Context) {
 	}
 }
 
-//Logout xx
+//DissAuth xx
 func DissAuth(c *gin.Context) {
 	u := c.PostForm("username")
 
@@ -147,7 +154,7 @@ func getProject(c *gin.Context) {
 }
 
 func createProject(c *gin.Context) {
-	// ProjectURL demo : yxwzaxns/cider
+	// ProjectURL demo : github.com/yxwzaxns/cider
 	var pr CreateProjectReq
 	c.BindJSON(&pr)
 	projectInfo := strings.Split(pr.ProjectURL, "/")
@@ -156,21 +163,30 @@ func createProject(c *gin.Context) {
 			"status": "error projrct url",
 		})
 	}
-	p := new(db.Project)
-	p.ProjectName = projectInfo[2]
-	p.ProjectURL = pr.ProjectURL
-	db.Projects.Add(p)
+	if err := db.Projects.Create(pr.ProjectURL); err != nil {
+		c.JSON(200, gin.H{
+			"status": err.Error(),
+		})
+	} else {
+		c.JSON(200, gin.H{
+			"status": "ok",
+		})
+	}
 
-	c.JSON(200, gin.H{
-		"status": "ok",
-	})
 }
 
 func deleteProject(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"status": "posted",
-		"user":   "ok",
-	})
+	name := c.Param("name")
+	println(name)
+	if db.Projects.Get(name).Delete() {
+		c.JSON(200, gin.H{
+			"status": "ok",
+		})
+	} else {
+		c.JSON(200, gin.H{
+			"status": "failed",
+		})
+	}
 }
 
 func coreCheck(c *gin.Context) {

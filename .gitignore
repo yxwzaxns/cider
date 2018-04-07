@@ -18,3 +18,5 @@ cider.db
 gin-bin
 
 certs/
+
+.DS_Store

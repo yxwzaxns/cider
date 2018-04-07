@@ -78,3 +78,11 @@ func GetTokenTimeOut() time.Duration {
 		return time.Duration(t)
 	}
 }
+
+func GetCurrentTime() string {
+	return time.Now().Local().String()
+}
+
+func DeleteFile(path string) {
+	os.Remove(path)
+}
