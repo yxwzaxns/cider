@@ -177,15 +177,21 @@ func createProject(c *gin.Context) {
 
 func deleteProject(c *gin.Context) {
 	name := c.Param("name")
-	println(name)
-	if db.Projects.Get(name).Delete() {
-		c.JSON(200, gin.H{
-			"status": "ok",
-		})
+	if name == "all" {
+		count := len(db.Projects)
+		for i := 0; i < count; i++ {
+			db.Projects[0].Delete()
+		}
 	} else {
-		c.JSON(200, gin.H{
-			"status": "failed",
-		})
+		if db.Projects.Get(name).Delete() {
+			c.JSON(200, gin.H{
+				"status": "ok",
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"status": "failed",
+			})
+		}
 	}
 }
 
